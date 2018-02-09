@@ -1,0 +1,67 @@
+#pragma once
+#include "Object.h"
+#include <vector>
+
+struct CBufferVertex_SphereForTest
+{
+	XMMATRIX WVProj;
+	XMMATRIX WorldInverseTranspose;
+	XMMATRIX WorldMatrix;
+	XMFLOAT4 SpecularColor;
+	XMFLOAT3 EyePosition;
+};
+struct SphereVertex
+{
+	XMFLOAT3 Pos;
+	SphereVertex()
+	{
+		Pos.x = 0;
+		Pos.y = 0;
+		Pos.z = 0;
+	}
+	SphereVertex(float x, float y, float z)
+	{
+		Pos.x = x;
+		Pos.y = y;
+		Pos.z = z;
+	}
+};
+class SphereForTest : public Object
+{
+private:
+	float roughness;
+	XMFLOAT3 SpecularColor;
+
+	ID3D11SamplerState *mSamplerState;
+	ID3D11ShaderResourceView* mCubeTexture;
+
+	ID3D11Buffer * mVertexBuffer;
+	ID3D11Buffer * mIndexBuffer;
+	ID3D11Buffer * mCBMatrixBuffer;
+
+	ID3D11VertexShader* mVertexShader;
+	ID3D11PixelShader* mPixelShader;
+
+	ID3D11InputLayout* mInputLayout;
+
+	//Rasterize State
+	ID3D11RasterizerState* mRasterizerState;
+
+	//Blend State
+	ID3D11BlendState* mBlendState;
+
+	struct MeshData
+	{
+		std::vector<SphereVertex> vertices;
+		std::vector<UINT> indices;
+	};
+	MeshData meshData;
+	void GenerateMeshData(float radius, UINT sliceCount, UINT stackCount);
+public:
+	SphereForTest(WorldTransform transform,float roughness, XMFLOAT3 specularColor);
+	virtual bool init() override;
+	virtual void update(float Delta) override;
+	virtual void render() override;
+	virtual ~SphereForTest();
+	void recompileshader() {}
+};
