@@ -43,10 +43,10 @@ private:
 	void ProcessJointsAndAnimations(FbxNode* inNode);
 	unsigned int FindJointIndexUsingName(const std::string& inJointName);
 	void ProcessMesh(FbxNode* inNode);
-	void ReadUV(FbxMesh* inMesh, int inCtrlPointIndex, int inTextureUVIndex, int inUVLayer, XMFLOAT2& outUV);
-	void ReadNormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, XMFLOAT3& outNormal);
-	void ReadBinormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, XMFLOAT3& outBinormal);
-	void ReadTangent(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, XMFLOAT3& outTangent);
+	void ReadUV(FbxMesh* inMesh, int inCtrlPointIndex, int inTextureUVIndex, int inUVLayer, AS3DVECTOR2& outUV);
+	void ReadNormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, AS3DVECTOR3& outNormal);
+	void ReadBinormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, AS3DVECTOR3& outBinormal);
+	void ReadTangent(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, AS3DVECTOR3& outTangent);
 	void Optimize();
 	int FindVertex(const PNTIWVertex& inTargetVertex, const std::vector<PNTIWVertex>& uniqueVertices);
 

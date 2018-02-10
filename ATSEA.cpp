@@ -58,9 +58,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	}
 	//初始化所有数据
 	WorldManager::Instance().init();
-	XMVECTOR pos = XMVectorSet( 0,  0, 2000, 1.0f);
-	XMVECTOR target = XMVectorZero();
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	AS3DVECTOR3 pos(0,  0, 2000);
+	AS3DVECTOR3 target(0,0,0);
+	AS3DVECTOR3 up(0.0f, 1.0f, 0.0f);
 	Camera::Instance().Init(pos, target, up,1.0f,100000.0f,1,0.3f * PI);
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_ATSEA));
 
@@ -355,9 +355,9 @@ void UpdateCamera()
 	float PosY = mRadius*cosf(mPhi) + mTargetPoint.y;
 
 	// Build the view matrix.
-	XMVECTOR pos = XMVectorSet(PosX, PosY, PosZ, 1.0f);
-	XMVECTOR target = XMVectorSet(mTargetPoint.x, mTargetPoint.y, mTargetPoint.z, 1.0f);
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	AS3DVECTOR3 pos(PosX, PosY, PosZ);
+	AS3DVECTOR3 target(mTargetPoint.x, mTargetPoint.y, mTargetPoint.z);
+	AS3DVECTOR3 up(0.0f, 1.0f, 0.0f);
 
 	Camera::Instance().LookAt(pos, target, up);
 }
@@ -513,11 +513,11 @@ void CameraTick()
 	
 	if (mMoveDir == 0)
 		return;
-	XMFLOAT3 dir = Camera::Instance().GetDir();
+	AS3DVECTOR3 dir = Camera::Instance().GetDir();
 	float length = sqrt(dir.x * dir.x + dir.z * dir.z);
 	dir.x = dir.x / length;
 	dir.z = dir.z / length;
-	XMFLOAT3 right = Camera::Instance().GetRight();
+	AS3DVECTOR3 right = Camera::Instance().GetRight();
 	if (mMoveDir & MD_FORWARD)
 	{
 		mTargetPoint.x += m_MoveSpeed * dir.x * nTickTime / 1000;

@@ -1,24 +1,21 @@
 #pragma once
-
-#include<xnamath.h>
 #include<vector>
 #include<map>
-
+#include "BaseUtilities/AS3DVector.h"
+#include "BaseUtilities/AS3DMatrix.h"
 extern const float PI;
-
+class AS3DMATRIX4;
 std::wstring string_to_wstring(std::string str);
 std::string wstring_to_string(std::wstring str);
-XMFLOAT3 Normalize(const XMFLOAT3& v);
-XMFLOAT3 CrossProduct(const XMFLOAT3& v1, const XMFLOAT3& v2);
-XMMATRIX TransformMatrix(const XMFLOAT3& dir, const XMFLOAT3& up,const XMFLOAT3& pos);
+AS3DMATRIX4 TransformMatrix(const AS3DVECTOR3& dir, const AS3DVECTOR3& up,const AS3DVECTOR3& pos);
 struct BaseCommonVertex
 {
-	XMFLOAT3 mPosition;
-	XMFLOAT3 mNormal;
-	XMFLOAT3 mTangent;
-	XMFLOAT3 mBinormal;
+	AS3DVECTOR3 mPosition;
+	AS3DVECTOR3 mNormal;
+	AS3DVECTOR3 mTangent;
+	AS3DVECTOR3 mBinormal;
 
-	XMFLOAT2 mUV;
+	AS3DVECTOR2 mUV;
 };
 struct MaterialDesc
 {
@@ -42,3 +39,5 @@ struct CommonMeshData
 		materials.clear();
 	}
 };
+
+AS3DMATRIX4 AS3DPerspectiveFovMatrix(float fFovY, float fAspect, float fZNear, float fZFar);

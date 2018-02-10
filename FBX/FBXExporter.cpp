@@ -234,7 +234,7 @@ void FBXExporter::ProcessControlPoints(FbxNode* inNode)
 	for(unsigned int i = 0; i < ctrlPointCount; ++i)
 	{
 		CtrlPoint* currCtrlPoint = new CtrlPoint();
-		XMFLOAT3 currPosition;
+		AS3DVECTOR3 currPosition;
 		currPosition.x = static_cast<float>(currMesh->GetControlPointAt(i).mData[0]);
 		currPosition.y = static_cast<float>(currMesh->GetControlPointAt(i).mData[1]);
 		currPosition.z = static_cast<float>(currMesh->GetControlPointAt(i).mData[2]);
@@ -359,10 +359,10 @@ void FBXExporter::ProcessMesh(FbxNode* inNode)
 
 	for (unsigned int i = 0; i < mTriangleCount; ++i)
 	{
-		XMFLOAT3 normal[3];
-		XMFLOAT3 tangent[3];
-		XMFLOAT3 binormal[3];
-		XMFLOAT2 UV[3][2];
+		AS3DVECTOR3 normal[3];
+		AS3DVECTOR3 tangent[3];
+		AS3DVECTOR3 binormal[3];
+		AS3DVECTOR2 UV[3][2];
 		Triangle currTriangle;
 		mTriangles.push_back(currTriangle);
 
@@ -419,7 +419,7 @@ void FBXExporter::ProcessMesh(FbxNode* inNode)
 	mControlPoints.clear();
 }
 
-void FBXExporter::ReadUV(FbxMesh* inMesh, int inCtrlPointIndex, int inTextureUVIndex, int inUVLayer, XMFLOAT2& outUV)
+void FBXExporter::ReadUV(FbxMesh* inMesh, int inCtrlPointIndex, int inTextureUVIndex, int inUVLayer, AS3DVECTOR2& outUV)
 {
 	int x = inMesh->GetElementUVCount();
 	if(inUVLayer >= 2 || inMesh->GetElementUVCount() <= inUVLayer)
@@ -471,7 +471,7 @@ void FBXExporter::ReadUV(FbxMesh* inMesh, int inCtrlPointIndex, int inTextureUVI
 	}
 }
 
-void FBXExporter::ReadNormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, XMFLOAT3& outNormal)
+void FBXExporter::ReadNormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, AS3DVECTOR3& outNormal)
 {
 	if(inMesh->GetElementNormalCount() < 1)
 	{
@@ -533,7 +533,7 @@ void FBXExporter::ReadNormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertex
 	}
 }
 
-void FBXExporter::ReadBinormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, XMFLOAT3& outBinormal)
+void FBXExporter::ReadBinormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, AS3DVECTOR3& outBinormal)
 {
 	if(inMesh->GetElementBinormalCount() < 1)
 	{
@@ -595,7 +595,7 @@ void FBXExporter::ReadBinormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVert
 	}
 }
 
-void FBXExporter::ReadTangent(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, XMFLOAT3& outTangent)
+void FBXExporter::ReadTangent(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, AS3DVECTOR3& outTangent)
 {
 	if(inMesh->GetElementTangentCount() < 1)
 	{

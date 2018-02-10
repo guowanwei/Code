@@ -4,7 +4,7 @@
 #include "Camera.h"
 #include "D3Dcompiler.h"
 #include <fstream>
-SphereForTest::SphereForTest(WorldTransform transform, float roughness, XMFLOAT3 specularColor)
+SphereForTest::SphereForTest(WorldTransform transform, float roughness, AS3DVECTOR3 specularColor)
 	:Object(transform)
 	, mSamplerState(0), mCubeTexture(0)
 {
@@ -126,12 +126,13 @@ bool SphereForTest::init()
 void SphereForTest::update(float Delta)
 {
 	CBufferVertex_SphereForTest cbufferVertex;
-	cbufferVertex.WVProj = XMMatrixTranspose(GetWorldTransformMatrix() * Camera::Instance().GetViewProj());
-	XMVECTOR tmp;
-	cbufferVertex.WorldInverseTranspose = XMMatrixTranspose(XMMatrixInverse(&tmp, XMMatrixTranspose(GetWorldTransformMatrix())));
-	cbufferVertex.WorldMatrix = XMMatrixTranspose(GetWorldTransformMatrix());
+	AS3DMATRIX4 tmp = GetWorldTransformMatrix() * Camera::Instance().GetViewProj();
+	cbufferVertex.WVProj = tmp.GetTranspose();
+	tmp = GetWorldTransformMatrix();
+	cbufferVertex.WorldInverseTranspose = tmp.GetInverse().GetTranspose();
+	cbufferVertex.WorldMatrix = tmp.GetTranspose();
 	cbufferVertex.EyePosition = Camera::Instance().GetEyePos();
-	XMFLOAT4 SC;
+	AS3DVECTOR4 SC;
 	SC.x = SpecularColor.x;
 	SC.y = SpecularColor.y;
 	SC.z = SpecularColor.z;
@@ -196,8 +197,8 @@ void SphereForTest::GenerateMeshData(float radius, UINT sliceCount, UINT stackCo
 
 	meshData.vertices.push_back(topVertex);
 
-	float phiStep = XM_PI / stackCount;
-	float thetaStep = 2.0f*XM_PI / sliceCount;
+	float phiStep = PI / stackCount;
+	float thetaStep = 2.0f*PI / sliceCount;
 
 	// Compute vertices for each stack ring (do not count the poles as rings).
 	for (UINT i = 1; i <= stackCount - 1; ++i)

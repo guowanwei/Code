@@ -65,7 +65,7 @@ Sky::Sky(WorldTransform transform)
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	ZeroMemory(&matrixBufferDesc, sizeof(matrixBufferDesc));
 	matrixBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	matrixBufferDesc.ByteWidth = sizeof(XMMATRIX);   //结构体大小,必须为16字节倍数
+	matrixBufferDesc.ByteWidth = sizeof(AS3DMATRIX4);   //结构体大小,必须为16字节倍数
 	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	matrixBufferDesc.CPUAccessFlags = 0;
 	Device::Instance().GetDevice()->CreateBuffer(&matrixBufferDesc, NULL, &mCBMatrixBuffer);
@@ -95,7 +95,7 @@ bool Sky::init()
 void Sky::update(float Delta)
 {
 	//SetPosition(Camera::Instance().GetEyePos());
-	XMMATRIX worldViewProj = XMMatrixTranspose(GetWorldTransformMatrix() * Camera::Instance().GetViewProj());
+	AS3DMATRIX4 worldViewProj = (GetWorldTransformMatrix() * Camera::Instance().GetViewProj()).GetTranspose();
 	Device::Instance().GetContext()->UpdateSubresource(mCBMatrixBuffer, 0, NULL, &worldViewProj, 0, 0);
 }
 void Sky::render()
@@ -155,8 +155,8 @@ void Sky::GenerateMeshData(float radius, UINT sliceCount, UINT stackCount)
 
 	meshData.vertices.push_back(topVertex);
 
-	float phiStep = XM_PI / stackCount;
-	float thetaStep = 2.0f*XM_PI / sliceCount;
+	float phiStep = PI / stackCount;
+	float thetaStep = 2.0f*PI / sliceCount;
 
 	// Compute vertices for each stack ring (do not count the poles as rings).
 	for (UINT i = 1; i <= stackCount - 1; ++i)

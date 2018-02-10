@@ -4,15 +4,15 @@
 
 struct CBufferVertex_SphereForTest
 {
-	XMMATRIX WVProj;
-	XMMATRIX WorldInverseTranspose;
-	XMMATRIX WorldMatrix;
-	XMFLOAT4 SpecularColor;
-	XMFLOAT3 EyePosition;
+	AS3DMATRIX4 WVProj;
+	AS3DMATRIX4 WorldInverseTranspose;
+	AS3DMATRIX4 WorldMatrix;
+	AS3DVECTOR4 SpecularColor;
+	AS3DVECTOR3 EyePosition;
 };
 struct SphereVertex
 {
-	XMFLOAT3 Pos;
+	AS3DVECTOR3 Pos;
 	SphereVertex()
 	{
 		Pos.x = 0;
@@ -30,7 +30,7 @@ class SphereForTest : public Object
 {
 private:
 	float roughness;
-	XMFLOAT3 SpecularColor;
+	AS3DVECTOR3 SpecularColor;
 
 	ID3D11SamplerState *mSamplerState;
 	ID3D11ShaderResourceView* mCubeTexture;
@@ -58,7 +58,7 @@ private:
 	MeshData meshData;
 	void GenerateMeshData(float radius, UINT sliceCount, UINT stackCount);
 public:
-	SphereForTest(WorldTransform transform,float roughness, XMFLOAT3 specularColor);
+	SphereForTest(WorldTransform transform,float roughness, AS3DVECTOR3 specularColor);
 	virtual bool init() override;
 	virtual void update(float Delta) override;
 	virtual void render() override;

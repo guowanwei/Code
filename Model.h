@@ -2,7 +2,6 @@
 #include<d3d11.h>
 #include<d3dx11.h>
 #include<DxErr.h>
-#include <xnamath.h>
 #include "BaseUtilities.h"
 #include "Device.h"
 #include "Object.h"
@@ -40,16 +39,16 @@ public:
 //cbuffer 对齐还是需要注意的
 struct CBufferVertex1
 {
-	XMMATRIX WVProj;
-	XMMATRIX WorldMatrix;
-	XMMATRIX WorldInverseTranspose;
+	AS3DMATRIX4 WVProj;
+	AS3DMATRIX4 WorldMatrix;
+	AS3DMATRIX4 WorldInverseTranspose;
 };
 
 struct CBufferPixel1
 {
-	XMFLOAT4 LightDir;
-	XMFLOAT4 LightColor;
-	XMFLOAT4 EyePosW;
+	AS3DVECTOR4 LightDir;
+	AS3DVECTOR4 LightColor;
+	AS3DVECTOR4 EyePosW;
 };
 class Model : public Object
 {

@@ -197,20 +197,20 @@ void Model::update(float Delta)
 {
 	//这里为什么需要转置矩阵呢？
 	CBufferVertex1 cbufferVertex;
-	cbufferVertex.WVProj = XMMatrixTranspose(GetWorldTransformMatrix() * Camera::Instance().GetViewProj());
-	cbufferVertex.WorldMatrix = XMMatrixTranspose(GetWorldTransformMatrix());
+	cbufferVertex.WVProj = (GetWorldTransformMatrix() * Camera::Instance().GetViewProj()).GetTranspose();
+	cbufferVertex.WorldMatrix = (GetWorldTransformMatrix()).GetTranspose();
 	XMVECTOR tmp;
-	cbufferVertex.WorldInverseTranspose = XMMatrixTranspose(XMMatrixInverse(&tmp, cbufferVertex.WorldMatrix));
+	cbufferVertex.WorldInverseTranspose = cbufferVertex.WorldMatrix.GetInverse().GetTranspose();
 	Device::Instance().GetContext()->UpdateSubresource(mCBMatrixBufferVS, 0, NULL, &cbufferVertex, 0, 0);
 
 	CBufferPixel1 cbufferPixel;
-	cbufferPixel.LightColor = XMFLOAT4(8.0f, 8.0f, 8.0f, 0.0f);
+	cbufferPixel.LightColor = AS3DVECTOR4(8.0f, 8.0f, 8.0f, 0.0f);
 	//cbufferPixel.LightColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	XMFLOAT3 tmp1 = Camera::Instance().GetEyePos();
+	AS3DVECTOR3 tmp1 = Camera::Instance().GetEyePos();
 	cbufferPixel.EyePosW.x = tmp1.x;
 	cbufferPixel.EyePosW.y = tmp1.y;
 	cbufferPixel.EyePosW.z = tmp1.z;
-	cbufferPixel.LightDir = XMFLOAT4(-1.0f, -1.0f, -1.0f, 0.0f);
+	cbufferPixel.LightDir = AS3DVECTOR4(-1.0f, -1.0f, -1.0f, 0.0f);
 	//cbufferPixel.World = XMMatrixTranspose(GetWorldTransformMatrix());
 	//cbufferPixel.WorldViewProj = XMMatrixTranspose(Camera::Instance().GetViewProj());
 

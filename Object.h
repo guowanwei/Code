@@ -2,16 +2,15 @@
 #include<d3d11.h>
 #include<d3dx11.h>
 #include<DxErr.h>
-#include <xnamath.h>
 #include "BaseUtilities.h"
 #include "Device.h"
-
+#include "BaseUtilities/AS3DVector.h"
 struct WorldTransform
 {
-	XMFLOAT3 location; //world space position
-	XMFLOAT3 dir;    // direction; forward
-	XMFLOAT3 up;     // upward
-	XMFLOAT3 scale;   // scale factor
+	AS3DVECTOR3 location; //world space position
+	AS3DVECTOR3 dir;    // direction; forward
+	AS3DVECTOR3 up;     // upward
+	AS3DVECTOR3 scale;   // scale factor
 	WorldTransform()
 		:location(0.0f,0.0f,0.0f)
 		, dir(0.0f,0.0f,1.0f)
@@ -20,7 +19,7 @@ struct WorldTransform
 	{
 
 	}
-	WorldTransform(XMFLOAT3 loc, XMFLOAT3 dir, XMFLOAT3 up, XMFLOAT3 scale)
+	WorldTransform(AS3DVECTOR3 loc, AS3DVECTOR3 dir, AS3DVECTOR3 up, AS3DVECTOR3 scale)
 		:location(loc)
 		,dir(dir)
 		,up(up)
@@ -45,7 +44,7 @@ public:
 	virtual void render()  = 0;
 	virtual void recompileshader() = 0;
 	virtual ~Object();
-	XMMATRIX GetWorldTransformMatrix();
-	void SetPosition(XMFLOAT3 loc) { transform.location = loc; }
-	void SetScale(XMFLOAT3 Scale) { transform.scale = Scale; }
+	AS3DMATRIX4 GetWorldTransformMatrix();
+	void SetPosition(AS3DVECTOR3 loc) { transform.location = loc; }
+	void SetScale(AS3DVECTOR3 Scale) { transform.scale = Scale; }
 };

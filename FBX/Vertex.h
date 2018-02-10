@@ -2,25 +2,19 @@
 #include "MathHelper.h"
 #include <vector>
 #include <algorithm>
-
+#include "../BaseUtilities/AS3DVector.h"
 
 struct PNTVertex
 {
-	XMFLOAT3 mPosition;
-	XMFLOAT3 mNormal;
-	XMFLOAT2 mUV;
+	AS3DVECTOR3 mPosition;
+	AS3DVECTOR3 mNormal;
+	AS3DVECTOR2 mUV;
 
 	bool operator==(const PNTVertex& rhs) const
 	{
-		uint32_t position;
-		uint32_t normal;
-		uint32_t uv;
-
-		XMVectorEqualR(&position, XMLoadFloat3(&(this->mPosition)), XMLoadFloat3(&rhs.mPosition));
-		XMVectorEqualR(&normal, XMLoadFloat3(&(this->mNormal)), XMLoadFloat3(&rhs.mNormal));
-		XMVectorEqualR(&uv, XMLoadFloat2(&(this->mUV)), XMLoadFloat2(&rhs.mUV));
-
-		return XMComparisonAllTrue(position) && XMComparisonAllTrue(normal) && XMComparisonAllTrue(uv);
+		return mPosition == rhs.mPosition
+			&& mNormal == rhs.mNormal
+			&& mUV == rhs.mUV;
 	}
 };
 
@@ -42,11 +36,11 @@ struct VertexBlendingInfo
 
 struct PNTIWVertex
 {
-	XMFLOAT3 mPosition;
-	XMFLOAT3 mNormal;
-	XMFLOAT3 mTangent;
-	XMFLOAT3 mBinormal;
-	XMFLOAT2 mUV;
+	AS3DVECTOR3 mPosition;
+	AS3DVECTOR3 mNormal;
+	AS3DVECTOR3 mTangent;
+	AS3DVECTOR3 mBinormal;
+	AS3DVECTOR2 mUV;
 	std::vector<VertexBlendingInfo> mVertexBlendingInfos;
 
 	void SortBlendingInfoByWeight()
@@ -103,11 +97,8 @@ struct PNTIWVertex
 				}
 			}
 		}
-		
-		bool result1 = MathHelper::CompareVector3WithEpsilon(mPosition, rhs.mPosition);
-		bool result2 = MathHelper::CompareVector3WithEpsilon(mNormal, rhs.mNormal);
-		bool result3 = MathHelper::CompareVector2WithEpsilon(mUV, rhs.mUV);
-
-		return result1 && result2 && result3 && sameBlendingInfo;
+		return mPosition == rhs.mPosition
+			&& mNormal == rhs.mNormal
+			&& mUV == rhs.mUV && sameBlendingInfo;
 	}
 };

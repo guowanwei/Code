@@ -114,8 +114,9 @@ ConeRain::ConeRain(WorldTransform transform,float VOffSet)
 	matrixBufferDesc.ByteWidth = sizeof(CBufferVertexVS_ConeRain);   //结构体大小,必须为16字节倍数
 	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	matrixBufferDesc.CPUAccessFlags = 0;
-	Device::Instance().GetDevice()->CreateBuffer(&matrixBufferDesc, NULL, &mCBMatrixBufferVS);
-
+	result = Device::Instance().GetDevice()->CreateBuffer(&matrixBufferDesc, NULL, &mCBMatrixBufferVS);
+	if (FAILED(result))
+		std::cout << ::GetLastError() << std::endl;
 	//Create constant buffer
 	D3D11_BUFFER_DESC PSBufferDesc;
 	ZeroMemory(&PSBufferDesc, sizeof(PSBufferDesc));
@@ -175,10 +176,10 @@ void ConeRain::update(float Delta)
 	time += Delta;
 	SetPosition(Camera::Instance().GetEyePos());
 	CBufferVertexVS_ConeRain cbufferVertex;
-	cbufferVertex.WVProj = XMMatrixTranspose(GetWorldTransformMatrix() * Camera::Instance().GetViewProj());
-	XMVECTOR tmp;
-	cbufferVertex.WorldInverseTranspose = XMMatrixTranspose(XMMatrixInverse(&tmp, XMMatrixTranspose(GetWorldTransformMatrix())));
-	cbufferVertex.WorldMatrix = XMMatrixTranspose(GetWorldTransformMatrix());
+	cbufferVertex.WVProj = (GetWorldTransformMatrix() * Camera::Instance().GetViewProj()).GetTranspose();
+	AS3DMATRIX4 tmp = GetWorldTransformMatrix();
+	cbufferVertex.WorldInverseTranspose = tmp.GetTranspose().GetInverse().GetTranspose();
+	cbufferVertex.WorldMatrix = tmp.GetTranspose();
 	cbufferVertex.Time.x = time / 1000.0f;
 	Device::Instance().GetContext()->UpdateSubresource(mCBMatrixBufferVS, 0, NULL, &cbufferVertex, 0, 0);
 
@@ -256,12 +257,12 @@ void ConeRain::GenRainCameraCone()
 		for (int j = 0; j <= 16; ++j)
 		{
 			ConeRainVertex SV;
-			XMFLOAT3 Pos;
+			AS3DVECTOR3 Pos;
 			Pos.z = z_steps[i];
 			float radius = 1.0 - abs(Pos.z);
 			Pos.x = sin(j * PI_Eight) * radius;
 			Pos.y = cos(j * PI_Eight) * radius;
-			XMFLOAT3 UV;
+			AS3DVECTOR3 UV;
 			UV.x = U_Start + j * (U_End - U_Start)/16.0;
 			UV.y = 0.5 - Pos.z * 0.5;
 			SV.Pos = Pos;
@@ -300,12 +301,12 @@ void ConeRain::GenRainCameraCone2()
 			// first point
 			{
 				ConeRainVertex SV;
-				XMFLOAT3 Pos;
+				AS3DVECTOR3 Pos;
 				Pos.z = z_steps[i];
 				float radius = 1.0 - abs(Pos.z);
 				Pos.x = sin(j * PI_Eight) * radius;
 				Pos.y = cos(j * PI_Eight) * radius;
-				XMFLOAT3 UV;
+				AS3DVECTOR3 UV;
 				UV.x = (j * 2 + 1) / 32.0 - (1 - Pos.z) / 24.0;
 				UV.y = 0.5 - Pos.z * 0.5;
 				SV.Pos = Pos;
@@ -316,12 +317,12 @@ void ConeRain::GenRainCameraCone2()
 			if (j != 0 && j != 16)
 			{
 				ConeRainVertex SV;
-				XMFLOAT3 Pos;
+				AS3DVECTOR3 Pos;
 				Pos.z = z_steps[i];
 				float radius = 1.0 - abs(Pos.z);
 				Pos.x = sin(j * PI_Eight) * radius;
 				Pos.y = cos(j * PI_Eight) * radius;
-				XMFLOAT3 UV;
+				AS3DVECTOR3 UV;
 				UV.x = (j * 2 + 1) / 32.0 + (1 - Pos.z) / 24.0;
 				UV.y = 0.5 - Pos.z * 0.5;
 				SV.Pos = Pos;
@@ -360,12 +361,12 @@ void ConeRain::GenRainCameraCone3()
 		for (int j = 0; j <= 16; ++j)
 		{
 			ConeRainVertex SV;
-			XMFLOAT3 Pos;
+			AS3DVECTOR3 Pos;
 			Pos.z = z_steps[i];
 			float radius = 1.0 - abs(Pos.z);
 			Pos.x = sin(j * PI_Eight) * radius;
 			Pos.y = cos(j * PI_Eight) * radius;
-			XMFLOAT3 UVW;
+			AS3DVECTOR3 UVW;
 			UVW.x = j / 16.0;
 			if (j == 0) UVW.x += 1 / 32.0;
 			UVW.y = 0.5 - Pos.z * 0.5;
@@ -404,12 +405,12 @@ void ConeRain::GenRainCameraCone4()
 		for (int j = 0; j <= 16; ++j)
 		{
 			ConeRainVertex SV;
-			XMFLOAT3 Pos;
+			AS3DVECTOR3 Pos;
 			Pos.z = z_steps[i];
 			float radius = 1.0 - abs(Pos.z);
 			Pos.x = sin(j * PI_Eight) * radius;
 			Pos.y = cos(j * PI_Eight) * radius;
-			XMFLOAT3 UVW;
+			AS3DVECTOR3 UVW;
 			UVW.x = j / 16.0;
 			if (j == 0) UVW.x += 1 / 32.0;
 			UVW.y = 0.5 - Pos.z * 0.5;

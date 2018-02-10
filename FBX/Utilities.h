@@ -25,7 +25,7 @@ struct BlendingIndexWeightPair
 // vector of joint indices
 struct CtrlPoint
 {
-	XMFLOAT3 mPosition;
+	AS3DVECTOR3 mPosition;
 	std::vector<BlendingIndexWeightPair> mBlendingInfo;
 
 	CtrlPoint()

@@ -3,7 +3,7 @@
 #include <vector>
 struct SkyVertex
 {
-	XMFLOAT3 Pos;
+	AS3DVECTOR3 Pos;
 	SkyVertex()
 	{
 		Pos.x = 0;

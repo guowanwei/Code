@@ -3,8 +3,6 @@
 #include<d3d11.h>
 #include<d3dx11.h>
 #include<DxErr.h>
-
-#include<xnamath.h>
 struct Vertex
 {
 	XMFLOAT3 Pos;

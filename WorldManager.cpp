@@ -18,9 +18,9 @@ void WorldManager::init()
 	};
 	ModelLoadInfo ModelPath[] =
 	{
-		{ "Resource/Model/CMC_MF_01.FBX",L"Resource/Shader/Common.hlsl",{ XMFLOAT3(2000.0f,0.0f,0.0f),XMFLOAT3(0.0f,0,1.0f),XMFLOAT3(0,1,0),XMFLOAT3(1.0f,1.0f,1.0f)}},//房子
-		{ "Resource/Model/CMC_CM.FBX",L"Resource/Shader/Common.hlsl",{ XMFLOAT3(0.0f,0.0f,0.0f),XMFLOAT3(0.0f,0,1.0f),XMFLOAT3(0,1,0),XMFLOAT3(1.0f,1.0f,1.0f) }},//主要房子
-		{ "Resource/Model/ChaSi.FBX",L"Resource/Shader/Common.hlsl",{ XMFLOAT3(-2000.0f,0.0f,0.0f),XMFLOAT3(0.0f,1,0.0f),XMFLOAT3(0,0,1),XMFLOAT3(1.0f,1.0f,1.0f) } },//茶肆
+		{ "Resource/Model/CMC_MF_01.FBX",L"Resource/Shader/Common.hlsl",{ AS3DVECTOR3(2000.0f,0.0f,0.0f),AS3DVECTOR3(0.0f,0,1.0f),AS3DVECTOR3(0,1,0),AS3DVECTOR3(1.0f,1.0f,1.0f)}},//房子
+		{ "Resource/Model/CMC_CM.FBX",L"Resource/Shader/Common.hlsl",{ AS3DVECTOR3(0.0f,0.0f,0.0f),AS3DVECTOR3(0.0f,0,1.0f),AS3DVECTOR3(0,1,0),AS3DVECTOR3(1.0f,1.0f,1.0f) }},//主要房子
+		{ "Resource/Model/ChaSi.FBX",L"Resource/Shader/Common.hlsl",{ AS3DVECTOR3(-2000.0f,0.0f,0.0f),AS3DVECTOR3(0.0f,1,0.0f),AS3DVECTOR3(0,0,1),AS3DVECTOR3(1.0f,1.0f,1.0f) } },//茶肆
 	};
 	// models
 	for (int i = 0; i < sizeof(ModelPath) / sizeof(ModelPath[0]); ++i)
@@ -32,10 +32,10 @@ void WorldManager::init()
 	
 	//sky 
 	{
-		XMFLOAT3 scale(10.0f, 10.0f, 10.0f);
-		XMFLOAT3 loc(0, 0.0f, 0);
-		XMFLOAT3 dir(0.0f, 0.0f, 1.0f);
-		XMFLOAT3 up(0.0f, 1.0f, 1.0f);
+		AS3DVECTOR3 scale(10.0f, 10.0f, 10.0f);
+		AS3DVECTOR3 loc(0, 0.0f, 0);
+		AS3DVECTOR3 dir(0.0f, 0.0f, 1.0f);
+		AS3DVECTOR3 up(0.0f, 1.0f, 1.0f);
 		Object* sky = new Sky(WorldTransform(loc, dir, up, scale));
 		sky->init();
 		Objects.push_back(sky);
@@ -46,7 +46,7 @@ void WorldManager::init()
 		//{ "Resource/Model/CMC_MF_01.FBX",L"Resource/Shader/Common.hlsl",{ XMFLOAT3(2000.0f,0.0f,0.0f),XMFLOAT3(0.0f,0,1.0f),XMFLOAT3(0,1,0),XMFLOAT3(1.0f,1.0f,1.0f)}},//房子
 		//{ "Resource/Model/CMC_CM.FBX",L"Resource/Shader/Common.hlsl",{ XMFLOAT3(0.0f,0.0f,0.0f),XMFLOAT3(0.0f,0,1.0f),XMFLOAT3(0,1,0),XMFLOAT3(1.0f,1.0f,1.0f) }},//主要房子
 		//{ "Resource/Model/ChaSi.FBX",L"Resource/Shader/Common.hlsl",{ XMFLOAT3(-2000.0f,0.0f,0.0f),XMFLOAT3(0.0f,1,0.0f),XMFLOAT3(0,0,1),XMFLOAT3(1.0f,1.0f,1.0f) } },//茶肆
-		{ "Resource/Model/RainDrop0.FBX",L"Resource/Shader/RainDrop.hlsl",{ XMFLOAT3(0.0f,1000.0f,0.0f),XMFLOAT3(0.0f,1,0.0f),XMFLOAT3(0,0,1),XMFLOAT3(1.0f,1.0f,1.0f) } },//茶肆
+		{ "Resource/Model/RainDrop0.FBX",L"Resource/Shader/RainDrop.hlsl",{ AS3DVECTOR3(0.0f,1000.0f,0.0f),AS3DVECTOR3(0.0f,1,0.0f),AS3DVECTOR3(0,0,1),AS3DVECTOR3(1.0f,1.0f,1.0f) } },//茶肆
 	};
 	for (int i = 0; i < sizeof(RainDropModel) / sizeof(RainDropModel[0]); ++i)
 	{
@@ -57,13 +57,13 @@ void WorldManager::init()
 	}
 	//conerain
 	{
-		XMFLOAT3 scale(100.0f, 100.0f, 500.0f);
+		AS3DVECTOR3 scale(100.0f, 100.0f, 500.0f);
 		float x = 2000;
 		float z = 2000;
 		{
-			XMFLOAT3 loc(x, 0.0f, z + 800);
-			XMFLOAT3 dir(0.0f, 1.0f, 0.0f);
-			XMFLOAT3 up(0.0f, 0.0f, 1.0f);
+			AS3DVECTOR3 loc(x, 0.0f, z + 800);
+			AS3DVECTOR3 dir(0.0f, 1.0f, 0.0f);
+			AS3DVECTOR3 up(0.0f, 0.0f, 1.0f);
 			Object* conerain = new ConeRain(WorldTransform(loc, dir, up, scale), 0);
 			conerain->init();
 			pRain = static_cast<ConeRain*>(conerain);

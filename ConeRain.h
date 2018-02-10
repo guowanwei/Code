@@ -4,20 +4,20 @@
 #include <iostream>
 struct CBufferVertexVS_ConeRain
 {
-	XMMATRIX WVProj;
-	XMMATRIX WorldInverseTranspose;
-	XMMATRIX WorldMatrix;
-	XMFLOAT3 Time;
+	AS3DMATRIX4 WVProj;
+	AS3DMATRIX4 WorldInverseTranspose;
+	AS3DMATRIX4 WorldMatrix;
+	AS3DVECTOR4 Time;
 };
 
 struct CBufferVertexPS_ConeRain
 {
-	XMFLOAT4 RainIntensity;
+	AS3DVECTOR4 RainIntensity;
 };
 struct ConeRainVertex
 {
-	XMFLOAT3 Pos;
-	XMFLOAT3 UVW;
+	AS3DVECTOR3 Pos;
+	AS3DVECTOR3 UVW;
 	ConeRainVertex()
 	{
 		Pos.x = 0;

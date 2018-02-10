@@ -56,7 +56,7 @@ void RainDrop::update(float Delta)
 
 	//
 	float scale = CurScale/5;
-	XMFLOAT3 Scale(scale, scale, scale);
+	AS3DVECTOR3 Scale(scale, scale, scale);
 	SetScale(Scale);
 	Model::update(Delta);
 }
