@@ -13,18 +13,20 @@ Model::Model(const char* FbxFilePath, const WCHAR* ShaderFilePath, WorldTransfor
 	, mPixelShader(0), mInputLayout(0)
 	, mGeometryShader(0), mRasterizerState(0)
 	, mBlendState(0), mSamplerState(0)
+	, StartUpQuery(false)
 {
 	if (FbxFilePath == NULL || ShaderFilePath == NULL)
 	{
 		return;
 	}
+	mName = FbxFilePath;
 	//create vertex buffer
 	meshData.Clear();
 	//load fbx
 	FBXExporter fbxloader;
 	fbxloader.Initialize();
 	fbxloader.LoadModelInfo(FbxFilePath, meshData);
-	//
+	
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
 	vbd.ByteWidth = sizeof(BaseCommonVertex) * meshData.vertices.size();
@@ -191,6 +193,36 @@ Model::Model(const char* FbxFilePath, const WCHAR* ShaderFilePath, WorldTransfor
 
 	WCHAR* cubemapFilename = L"Resource/Texture/snowcube1024.dds";
 	D3DX11CreateShaderResourceViewFromFile(Device::Instance().GetDevice(), cubemapFilename, 0, 0, &mCubeTexture, 0);
+	
+	D3D11_QUERY_DESC queryDesc;
+	queryDesc.Query = D3D11_QUERY_OCCLUSION;
+	queryDesc.MiscFlags = 0;
+	HRESULT re = Device::Instance().GetDevice()->CreateQuery(&queryDesc, &mQuery);
+	if (FAILED(re))
+	{
+		std::cout << "gww" << std::endl;
+	}
+
+	// 初始化混合状态  
+	D3D11_BLEND_DESC blendDesc = { 0 };
+	blendDesc.RenderTarget[0].BlendEnable = FALSE; 
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	result = Device::Instance().GetDevice()->CreateBlendState(
+		&blendDesc,
+		&mBlendState
+	);
+	//depth stencil state
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthStencilDesc.StencilEnable = FALSE;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+	Device::Instance().GetDevice()->CreateDepthStencilState(&depthStencilDesc, &mDepthStencilState);
+	//boundbox
+	InitAABB();
 }
 
 void Model::update(float Delta)
@@ -216,10 +248,161 @@ void Model::update(float Delta)
 
 	Device::Instance().GetContext()->UpdateSubresource(mCBMatrixBufferPS, 0, NULL, &cbufferPixel, 0, 0);
 }
+void Model::InitAABB()
+{
+	AS3DVECTOR3 Corner1, Corner2;
+	std::vector<BaseCommonVertex>::iterator iter = meshData.vertices.begin();
+	Corner1 = Corner2 = iter->mPosition;
+	for (; iter != meshData.vertices.end(); ++iter)
+	{
+		if (iter->mPosition.x > Corner1.x) Corner1.x = iter->mPosition.x;
+		if (iter->mPosition.x < Corner2.x) Corner2.x = iter->mPosition.x;
+
+		if (iter->mPosition.y > Corner1.y) Corner1.y = iter->mPosition.y;
+		if (iter->mPosition.y < Corner2.y) Corner2.y = iter->mPosition.y;
+
+		if (iter->mPosition.z > Corner1.z) Corner1.z = iter->mPosition.z;
+		if (iter->mPosition.z < Corner2.z) Corner2.z = iter->mPosition.z;
+	}
+	//计算八个顶点
+	AS3DVECTOR3 BoxVertex[8];
+	BoxVertex[0]  = Corner1;
+	BoxVertex[1] = Corner1; BoxVertex[1].x = Corner2.x;
+	BoxVertex[2] = Corner1; BoxVertex[2].y = Corner2.y;
+	BoxVertex[3] = Corner1; BoxVertex[3].z = Corner2.z;
+
+	BoxVertex[4] = Corner2;
+	BoxVertex[5] = Corner2; BoxVertex[5].x = Corner1.x;
+	BoxVertex[6] = Corner2; BoxVertex[6].y = Corner1.y;
+	BoxVertex[7] = Corner2; BoxVertex[7].z = Corner1.z;
+
+	unsigned int BoxIndex[] =
+	{
+		1,7,4,4,6,1,
+		6,4,5,5,3,6,
+		3,5,2,2,0,3,
+		1,6,3,3,0,1,
+		7,1,0,0,2,7,
+		4,7,2,2,5,4
+	};
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(AS3DVECTOR3) * 8;
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	vbd.StructureByteStride = 0;
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &BoxVertex[0];
+	Device::Instance().GetDevice()->CreateBuffer(&vbd, &vinitData, &mBBVertexBuffer);
+
+	//create index buffer
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(BoxIndex);
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	ibd.StructureByteStride = 0;
+	D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = &BoxIndex[0];
+	HRESULT a = Device::Instance().GetDevice()->CreateBuffer(&ibd, &iinitData, &mBBIndexBuffer);
+
+	//compile and create shader
+	HRESULT result;
+	ID3D10Blob* errorMessage = NULL;
+	ID3D10Blob* VertexShaderBuffer = NULL;
+	ID3D10Blob* PixelShaderBuffer = NULL;
+
+	const WCHAR* ShaderFilePath = L"Resource/Shader/BoundingBox.hlsl";
+	result = D3DX11CompileFromFile(ShaderFilePath, NULL, NULL, "VS", "vs_5_0", D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, NULL, &VertexShaderBuffer, &errorMessage, NULL);
+	Device::Instance().GetDevice()->CreateVertexShader(VertexShaderBuffer->GetBufferPointer(), VertexShaderBuffer->GetBufferSize(), NULL, &mBBVertexShader);
+	result = D3DX11CompileFromFile(ShaderFilePath, NULL, NULL, "PS", "ps_5_0", D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, NULL, &PixelShaderBuffer, &errorMessage, NULL);
+	Device::Instance().GetDevice()->CreatePixelShader(PixelShaderBuffer->GetBufferPointer(), PixelShaderBuffer->GetBufferSize(), NULL, &mBBPixelShader);
+
+	//create input layout
+	D3D11_INPUT_ELEMENT_DESC vertexInputLayout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	unsigned int numElements = sizeof(vertexInputLayout) / sizeof(vertexInputLayout[0]);
+	result = Device::Instance().GetDevice()->CreateInputLayout(vertexInputLayout, numElements, VertexShaderBuffer->GetBufferPointer(), VertexShaderBuffer->GetBufferSize(), &mBBInputLayout);
+	VertexShaderBuffer->Release();
+	VertexShaderBuffer = NULL;
+	PixelShaderBuffer->Release();
+	PixelShaderBuffer = NULL;
+
+	//create resaterizer state
+	D3D11_RASTERIZER_DESC rasterDesc;
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.FillMode =  D3D11_FILL_SOLID;//
+	rasterDesc.FrontCounterClockwise = true;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+	rasterDesc.MultisampleEnable = false;
+	result = Device::Instance().GetDevice()->CreateRasterizerState(&rasterDesc, &mBBRasterizerState);
+
+	D3D11_BLEND_DESC blendDesc = { 0 };
+	blendDesc.RenderTarget[0].BlendEnable = FALSE;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = 0;//D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	result = Device::Instance().GetDevice()->CreateBlendState(
+		&blendDesc,
+		&mBBBlendState
+	);
+
+	//depth stencil state
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthStencilDesc.StencilEnable = FALSE;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+	Device::Instance().GetDevice()->CreateDepthStencilState(&depthStencilDesc, &mBBDepthStencilState);
+}
+void Model::RenderAABB()
+{
+	Device::Instance().GetContext()->IASetInputLayout(mBBInputLayout);
+	Device::Instance().GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	UINT stride = sizeof(AS3DVECTOR3);
+	UINT offset = 0;
+	Device::Instance().GetContext()->IASetVertexBuffers(0, 1, &mBBVertexBuffer, &stride, &offset);
+	Device::Instance().GetContext()->IASetIndexBuffer(mBBIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	Device::Instance().GetContext()->VSSetConstantBuffers(0, 1, &mCBMatrixBufferVS);
+
+	//设置VertexShader和PixelShader
+	Device::Instance().GetContext()->VSSetShader(mBBVertexShader, NULL, 0);
+	Device::Instance().GetContext()->PSSetShader(mBBPixelShader, NULL, 0);
+	Device::Instance().GetContext()->RSSetState(mBBRasterizerState);
+	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	Device::Instance().GetContext()->OMSetBlendState(mBBBlendState, blendFactor, 0xffffffff);
+	Device::Instance().GetContext()->OMSetDepthStencilState(mBBDepthStencilState, 0);
+	//这里处理硬件遮蔽查询，查询时机需要间隔一帧！
+	Device::Instance().GetContext()->Begin(mQuery);
+	Device::Instance().GetContext()->DrawIndexed(36, 0, 0);
+	Device::Instance().GetContext()->End(mQuery);
+}
 void Model::render()
 {
 	//设置顶点输入布局
 	if (!bVisiable) return;
+	//这里处理硬件遮蔽查询，查询时机需要间隔一帧！
+	UINT64 Pixel = 0;
+	if (StartUpQuery)
+	{
+		//这里是异步的，所以可以做些其他的事情
+		while (Device::Instance().GetContext()->GetData(mQuery, &Pixel, sizeof(UINT64), D3D11_ASYNC_GETDATA_DONOTFLUSH) != S_OK) ;//
+	}
+	StartUpQuery = true;
+	//首选渲染boundingbox
+	RenderAABB();
+	if (Pixel == 0) return;
 	Device::Instance().GetContext()->IASetInputLayout(mInputLayout);
 	Device::Instance().GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	UINT stride = sizeof(BaseCommonVertex);
@@ -236,6 +419,8 @@ void Model::render()
 	Device::Instance().GetContext()->RSSetState(mRasterizerState);
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	Device::Instance().GetContext()->OMSetBlendState(mBlendState, blendFactor, 0xffffffff);
+	Device::Instance().GetContext()->OMSetDepthStencilState(mDepthStencilState, 0);
+
 	for (std::map<UINT, MaterialDesc>::iterator iter = meshData.materials.begin(); iter != meshData.materials.end(); ++iter)
 	{
 		Device::Instance().GetContext()->PSSetShaderResources(0, 1, &mMaterials[iter->first].DiffuseMap);
@@ -245,6 +430,12 @@ void Model::render()
 
 		Device::Instance().GetContext()->DrawIndexed(iter->second.countIndex, iter->second.startIndex, 0);
 	}
+	static int x = 0;
+	if (x == 1000)
+	{
+		std::cout << mName << std::endl;
+	}
+	x = (x + 1) % 1001;
 }
 bool Model::init()
 {
@@ -275,12 +466,35 @@ Model::~Model()
 
 	if (mRasterizerState) mRasterizerState->Release();
 	mRasterizerState = 0;
+	
 	if (mBlendState) mBlendState->Release();
 	mBlendState = 0;
 	if (mSamplerState) mSamplerState->Release();
 	mSamplerState = 0;
 	if (mCubeTexture) mCubeTexture->Release();
 	mCubeTexture = 0;
+	if (mQuery) mQuery->Release();
+	mQuery = 0;
+	if (mDepthStencilState) mDepthStencilState->Release();
+	mDepthStencilState = NULL;
+
+
+	if (mBBVertexBuffer) mBBVertexBuffer->Release();
+	mBBVertexBuffer = NULL;
+	if (mBBIndexBuffer)mBBIndexBuffer->Release();
+	mBBIndexBuffer = NULL;
+	if( mBBVertexShader) mBBVertexShader->Release();
+	mBBVertexShader = NULL;
+	if (mBBPixelShader) mBBPixelShader->Release();
+	mBBPixelShader = NULL;
+	if (mBBInputLayout) mBBInputLayout->Release();
+	mBBInputLayout = NULL;
+	if (mBBRasterizerState) mBBRasterizerState->Release();
+	mBBRasterizerState = NULL;
+	if (mBBBlendState) mBBBlendState->Release();
+	mBBBlendState = NULL;
+	if (mBBDepthStencilState) mBBDepthStencilState->Release();
+	mBBDepthStencilState = NULL;
 }
 void Model::recompileshader()
 {

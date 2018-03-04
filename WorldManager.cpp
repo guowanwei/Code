@@ -55,6 +55,48 @@ void WorldManager::init()
 		Objects.push_back(pObject);
 		pRainDrop = pObject;
 	}
+	//sphere for test
+	/*
+	for( int row = 1; row < 9; ++row)
+	{
+		AS3DVECTOR3 scale(10.0f, 10.0f, 10.0f);
+		float x =  1500 + row * 300;
+		float z = 2000;
+		float roughness = (row + 1) * 0.1;
+		{
+			AS3DVECTOR3 loc(x, 0.0f, z + 800);
+			AS3DVECTOR3 dir(0.0f, 1.0f, 0.0f);
+			AS3DVECTOR3 up(0.0f, 0.0f, 1.0f);
+			Object* sphereForIBL = new SphereForTest(WorldTransform(loc,dir,up,scale), roughness, AS3DVECTOR3(0.972, 0.960, 0.915));//银子
+			sphereForIBL->init();
+			Objects.push_back(sphereForIBL);
+		}
+		{
+			AS3DVECTOR3 loc(x, 0.0f, z + 600);
+			AS3DVECTOR3 dir(0.0f, 0.0f, 1.0f);
+			AS3DVECTOR3 up(0.0f, 1.0f, 0.0f);
+			Object* sphereForIBL = new SphereForTest(WorldTransform(loc, dir, up, scale), roughness, AS3DVECTOR3(1.022, 0.782, 0.344)); //金子
+			sphereForIBL->init();
+			Objects.push_back(sphereForIBL);
+		}
+		{
+			AS3DVECTOR3 loc(x, 0.0f, z + 400);
+			AS3DVECTOR3 dir(0.0f, 0.0f, 1.0f);
+			AS3DVECTOR3 up(0.0f, 1.0f, 0.0f);
+			Object* sphereForIBL = new SphereForTest(WorldTransform(loc, dir, up, scale), roughness, AS3DVECTOR3(0.04, 0.04, 0.04));   //非金属
+			sphereForIBL->init();
+			Objects.push_back(sphereForIBL);
+		}
+		{
+			AS3DVECTOR3 loc(x, 0.0f, z + 200);
+			AS3DVECTOR3 dir(0.0f, 0.0f, 1.0f);
+			AS3DVECTOR3 up(0.0f, 1.0f, 0.0f);
+			Object* sphereForIBL = new SphereForTest(WorldTransform(loc, dir, up, scale), roughness, AS3DVECTOR3(0.562, 0.565, 0.578));  //铁
+			sphereForIBL->init();
+			Objects.push_back(sphereForIBL);
+		}
+	}
+	*/
 	//conerain
 	{
 		AS3DVECTOR3 scale(100.0f, 100.0f, 500.0f);
@@ -70,49 +112,6 @@ void WorldManager::init()
 			Objects.push_back(conerain);
 		}
 	}
-	
-	//sphere for test
-	/*
-	for( int row = 1; row < 9; ++row)
-	{
-		XMFLOAT3 scale(10.0f, 10.0f, 10.0f);
-		float x =  1500 + row * 300;
-		float z = 2000;
-		float roughness = (row + 1) * 0.1;
-		{
-			XMFLOAT3 loc(x, 0.0f, z + 800);
-			XMFLOAT3 dir(0.0f, 1.0f, 0.0f);
-			XMFLOAT3 up(0.0f, 0.0f, 1.0f);
-			Object* sphereForIBL = new SphereForTest(WorldTransform(loc,dir,up,scale), roughness, XMFLOAT3(0.972, 0.960, 0.915));//银子
-			sphereForIBL->init();
-			Objects.push_back(sphereForIBL);
-		}
-		{
-			XMFLOAT3 loc(x, 0.0f, z + 600);
-			XMFLOAT3 dir(0.0f, 0.0f, 1.0f);
-			XMFLOAT3 up(0.0f, 1.0f, 0.0f);
-			Object* sphereForIBL = new SphereForTest(WorldTransform(loc, dir, up, scale), roughness, XMFLOAT3(1.022, 0.782, 0.344)); //金子
-			sphereForIBL->init();
-			Objects.push_back(sphereForIBL);
-		}
-		{
-			XMFLOAT3 loc(x, 0.0f, z + 400);
-			XMFLOAT3 dir(0.0f, 0.0f, 1.0f);
-			XMFLOAT3 up(0.0f, 1.0f, 0.0f);
-			Object* sphereForIBL = new SphereForTest(WorldTransform(loc, dir, up, scale), roughness, XMFLOAT3(0.04, 0.04, 0.04));   //非金属
-			sphereForIBL->init();
-			Objects.push_back(sphereForIBL);
-		}
-		{
-			XMFLOAT3 loc(x, 0.0f, z + 200);
-			XMFLOAT3 dir(0.0f, 0.0f, 1.0f);
-			XMFLOAT3 up(0.0f, 1.0f, 0.0f);
-			Object* sphereForIBL = new SphereForTest(WorldTransform(loc, dir, up, scale), roughness, XMFLOAT3(0.562, 0.565, 0.578));  //铁
-			sphereForIBL->init();
-			Objects.push_back(sphereForIBL);
-		}
-	}
-	*/
 }
 void WorldManager::update(float delta)
 {

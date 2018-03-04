@@ -63,6 +63,7 @@ private:
 	//Blend State
 	ID3D11BlendState* mBlendState;
 
+	ID3D11DepthStencilState* mDepthStencilState;
 	struct MeshData
 	{
 		std::vector<ConeRainVertex> vertices;

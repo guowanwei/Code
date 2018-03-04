@@ -103,7 +103,7 @@ SphereForTest::SphereForTest(WorldTransform transform, float roughness, AS3DVECT
 	rasterDesc.DepthBias = 0;
 	rasterDesc.DepthBiasClamp = 0.0f;
 	rasterDesc.DepthClipEnable = true; //深度裁剪开启
-	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;// D3D11_FILL_SOLID; //实体渲染
+	rasterDesc.FillMode = D3D11_FILL_SOLID; //实体渲染
 	rasterDesc.FrontCounterClockwise = false; //顺时针
 	rasterDesc.MultisampleEnable = false;
 	rasterDesc.ScissorEnable = false;

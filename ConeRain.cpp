@@ -165,6 +165,16 @@ ConeRain::ConeRain(WorldTransform transform,float VOffSet)
 		&blendDesc,
 		&mBlendState
 	);
+
+	//depth stencil state
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthStencilDesc.StencilEnable = FALSE;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+	Device::Instance().GetDevice()->CreateDepthStencilState(&depthStencilDesc, &mDepthStencilState);
 }
 bool ConeRain::init()
 {
@@ -207,6 +217,7 @@ void ConeRain::render()
 
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	Device::Instance().GetContext()->OMSetBlendState(mBlendState,blendFactor, 0xffffffff);
+	Device::Instance().GetContext()->OMSetDepthStencilState(mDepthStencilState, 0);
 	Device::Instance().GetContext()->DrawIndexed(meshData.indices.size(), 0, 0);
 }
 ConeRain::~ConeRain()
@@ -241,6 +252,8 @@ ConeRain::~ConeRain()
 	mRasterizerState = 0;
 	if (mBlendState) mBlendState->Release();
 	mBlendState = 0;
+	if (mDepthStencilState) mDepthStencilState->Release();
+	mDepthStencilState = 0;
 }
 
 void ConeRain::GenRainCameraCone()

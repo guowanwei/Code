@@ -25,6 +25,7 @@ ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+DWORD FramesFromGameBegin = 0;
 void CameraTick();
 UINT32 GetMilliSecond();
 int APIENTRY _tWinMain(HINSTANCE hInstance,
@@ -65,7 +66,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_ATSEA));
 
 	// Main message loop:
-	int FramesFromGameBegin = 0;
+	
 	while (true)
 	{
 		/*
@@ -102,9 +103,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			nLastTime = GetMilliSecond();
 		EndCountPerformance(Update)
 			//
-			BeginCountPerformance(Render)
+			//BeginCountPerformance(Render)
 			Render::Instance().RenderFlow();
-		EndCountPerformance(Render)
+		//EndCountPerformance(Render)
 			//WorldManager::Instance().render();
 			CameraTick();
 

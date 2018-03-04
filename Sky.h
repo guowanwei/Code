@@ -38,6 +38,8 @@ class Sky : public Object
 	//Blend State
 	ID3D11BlendState* mBlendState;
 
+	//depth stencil
+	ID3D11DepthStencilState* mDepthStencilState;
 	struct MeshData
 	{
 		std::vector<SkyVertex> vertices;

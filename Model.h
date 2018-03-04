@@ -52,9 +52,10 @@ struct CBufferPixel1
 };
 class Model : public Object
 {
+	std::string mName;
+	bool StartUpQuery;
 	//geometry info cache
 	CommonMeshData meshData;
-
 protected:
 	std::map<UINT, MaterialTexture>  mMaterials;
 	//one sampler state
@@ -80,6 +81,22 @@ protected:
 
 	//Blend State
 	ID3D11BlendState* mBlendState;
+	//Ó²¼þÕÚ±Î²éÑ¯
+	ID3D11Query* mQuery;
+
+	ID3D11DepthStencilState* mDepthStencilState;
+/**********************************************/
+	//Bounding box
+	ID3D11Buffer * mBBVertexBuffer;
+	ID3D11Buffer * mBBIndexBuffer;
+	//shaders
+	ID3D11VertexShader* mBBVertexShader;
+	ID3D11PixelShader* mBBPixelShader;
+
+	ID3D11InputLayout* mBBInputLayout;
+	ID3D11RasterizerState* mBBRasterizerState;
+	ID3D11BlendState* mBBBlendState;
+	ID3D11DepthStencilState* mBBDepthStencilState;
 
 public:
 	Model(const char* FbxFilePath, const WCHAR* ShaderFilePath, WorldTransform transform);
@@ -87,5 +104,7 @@ public:
 	virtual void update(float Delta) override;
 	virtual void render() override;
 	virtual void recompileshader() override;
+	virtual void InitAABB();
+	virtual void RenderAABB();
 	virtual ~Model();
 };

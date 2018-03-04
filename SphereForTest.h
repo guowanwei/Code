@@ -8,7 +8,7 @@ struct CBufferVertex_SphereForTest
 	AS3DMATRIX4 WorldInverseTranspose;
 	AS3DMATRIX4 WorldMatrix;
 	AS3DVECTOR4 SpecularColor;
-	AS3DVECTOR3 EyePosition;
+	AS3DVECTOR4 EyePosition;
 };
 struct SphereVertex
 {

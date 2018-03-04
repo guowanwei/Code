@@ -2,6 +2,7 @@
 #include "Render.h"
 #include "Device.h"
 #include "WorldManager.h"
+#include "count_performance.h"
 Render& Render::Instance()
 {
 	static Render render;
@@ -32,5 +33,8 @@ void Render::RenderFlow()
 	Device::Instance().DrawOnScreenFinally();
 	Device::Instance().ClearRenderTarget();
 	WorldManager::Instance().render();
+	BeginCountPerformance(Present)
+		//BeginCountPerformance(ggg)
 	Device::Instance().GetSwapChain()->Present(0, 0);
+	EndCountPerformance(Present)
 }

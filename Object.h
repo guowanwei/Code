@@ -43,8 +43,10 @@ public:
 	virtual void update(float Delta) = 0;
 	virtual void render()  = 0;
 	virtual void recompileshader() = 0;
+	
 	virtual ~Object();
 	AS3DMATRIX4 GetWorldTransformMatrix();
 	void SetPosition(AS3DVECTOR3 loc) { transform.location = loc; }
 	void SetScale(AS3DVECTOR3 Scale) { transform.scale = Scale; }
+
 };
