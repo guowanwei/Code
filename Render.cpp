@@ -4,6 +4,7 @@
 #include "WorldManager.h"
 #include "count_performance.h"
 #include "DeferredRender/DeferredRender.h"
+#include "ForwardRender/ForwardRender.h"
 Render& Render::Instance()
 {
 	static Render render;
@@ -12,36 +13,19 @@ Render& Render::Instance()
 
 Render::Render()
 {
-	UINT ScreenWidth = Device::Instance().GetWinWidth();
-	UINT ScreenHeight = Device::Instance().GetWinHeight();
-	ToneMapRenderTarget = new RenderTarget(ScreenWidth, ScreenHeight, DXGI_FORMAT_R16G16B16A16_FLOAT);
 }
 Render::~Render()
 {
-	if (ToneMapRenderTarget) delete ToneMapRenderTarget;
-	ToneMapRenderTarget = 0;
 }
 void Render::RenderFlow()
 {
-	//现将world渲染到ToneMapRenderTarget中
-	/*
-	ToneMapRenderTarget->ApplyToDevice();
-	ToneMapRenderTarget->ClearRenderTarget();
-	WorldManager::Instance().render();
-	*/
-
-	//最后渲染的屏幕中来
 	//forward rendering
 	if (!WorldManager::Instance().IsDeferringRenderMode())
 	{
-		Device::Instance().DrawOnScreenFinally();
-		Device::Instance().ClearRenderTarget();
-		WorldManager::Instance().render();
-		//WorldManager::Instance().GenGBuffer();
+		ForwardRender::Instance().Render();
 	}
-	else
+	else // deferred rendering
 	{
-		Device::Instance().ClearRenderTarget();
 		DeferredRender::Instance().Render();
 	}
 

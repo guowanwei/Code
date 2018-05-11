@@ -7,13 +7,11 @@ class DeferredRender : public IRender
 	RenderTarget* Normal;
 	RenderTarget* BaseColor;
 	RenderTarget* RoughnessMetallic;
-
-	//world position 
 	RenderTarget* WorldPos;
 
 	DrawQuad* Quad;
 public:
-	virtual void Render();
+	virtual void Render() override;
 private:
 	DeferredRender();
 public:

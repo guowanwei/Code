@@ -49,13 +49,18 @@ public:
 	{
 		float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 		d3dContext_->ClearRenderTargetView(backBufferTarget_, clearColor);
-		d3dContext_->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		//d3dContext_->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	}
 	void ClearRenderTarget(ID3D11RenderTargetView* RenderTargetView)
 	{
 		float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 		d3dContext_->ClearRenderTargetView(RenderTargetView, clearColor);
+	}
+
+	void ClearDepthBuffer()
+	{
+		d3dContext_->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	}
 	~Device();
 	bool DrawOnScreenFinally();

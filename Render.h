@@ -4,8 +4,6 @@ class Render
 {
 private:
 	Render();
-
-	RenderTarget* ToneMapRenderTarget;
 public:
 	static Render& Instance();
 	~Render();

@@ -4,7 +4,7 @@
 #include "../WorldManager.h"
 void DeferredRender::Render()
 {
-	//set render target
+	//set render target and depth buffer
 	Device& device  = Device::Instance();
 	BaseColor = RenderTargetManager::Instance().PopRenderTarget(device.GetWinWidth(), device.GetWinHeight(), DXGI_FORMAT_R8G8B8A8_UNORM);
 	device.ClearRenderTarget(BaseColor->GetRenderTargetView());
@@ -16,18 +16,21 @@ void DeferredRender::Render()
 	device.ClearRenderTarget(WorldPos->GetRenderTargetView());
 	RenderTarget* tmp[4] = { BaseColor ,Normal,RoughnessMetallic,WorldPos };
 	device.SetRenderTargets(4, &tmp[0], NULL);
+	device.ClearDepthBuffer();
+
 	
 	// GBuffer stage
 	WorldManager::Instance().GenGBuffer();
 
 
-
+	//set final render target
 	device.DrawOnScreenFinally();
-	Device::Instance().ClearRenderTarget();
+	device.ClearRenderTarget();
+
 	//light stage
 	Quad->render(BaseColor, Normal, RoughnessMetallic, WorldPos);
 
-	//¹é»¹rendertarget
+	//back rendertarget
 	RenderTargetManager::Instance().PushRenderTarget(Normal);
 	Normal = NULL;
 	RenderTargetManager::Instance().PushRenderTarget(BaseColor);
@@ -37,6 +40,9 @@ void DeferredRender::Render()
 	RenderTargetManager::Instance().PushRenderTarget(WorldPos);
 	WorldPos = NULL;
 
+	//render transparent objects
+	//
+	WorldManager::Instance().RenderTransparentObjects();
 }
 
 DeferredRender::DeferredRender()

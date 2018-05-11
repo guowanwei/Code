@@ -50,4 +50,6 @@ public:
 
 	//
 	void GenGBuffer();
+	void RenderOpaqueObjects();
+	void RenderTransparentObjects();
 };

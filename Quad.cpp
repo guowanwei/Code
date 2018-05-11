@@ -187,7 +187,7 @@ void DrawQuad::render(RenderTarget* BaseColor, RenderTarget* Normal, RenderTarge
 	UINT offset = 0;
 	Device::Instance().GetContext()->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
 	//Device::Instance().GetContext()->VSSetConstantBuffers(0, 1, &mCBMatrixBufferVS);
-	//Device::Instance().GetContext()->PSSetConstantBuffers(0, 1, &mCBMatrixBufferPS);
+	Device::Instance().GetContext()->PSSetConstantBuffers(0, 1, &mCBMatrixBufferPS);
 	Device::Instance().GetContext()->PSSetSamplers(0, 1, &mSamplerState);
 
 	//…Ë÷√VertexShader∫ÕPixelShader

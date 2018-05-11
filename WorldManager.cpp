@@ -29,7 +29,7 @@ void WorldManager::init()
 		pObject->init();
 		Objects.push_back(pObject);
 	}
-	/*
+	
 	//sky 
 	{
 		AS3DVECTOR3 scale(10.0f, 10.0f, 10.0f);
@@ -55,7 +55,7 @@ void WorldManager::init()
 		Objects.push_back(pObject);
 		pRainDrop = pObject;
 	}
-	*/
+	
 	//sphere for test
 	/*
 	for( int row = 1; row < 9; ++row)
@@ -99,7 +99,6 @@ void WorldManager::init()
 	}
 	*/
 	//conerain
-	/*
 	{
 		AS3DVECTOR3 scale(100.0f, 100.0f, 500.0f);
 		float x = 2000;
@@ -114,7 +113,7 @@ void WorldManager::init()
 			Objects.push_back(conerain);
 		}
 	}
-	*/
+	
 	//init compute shader test module
 	pComputeShaderTest = new ComputeShaderTestModule();
 }
@@ -152,6 +151,9 @@ bool WorldManager::IsDeferringRenderMode()
 {
 	return DeferredRendering;
 }
+
+
+
 void WorldManager::GenGBuffer()
 {
 	
@@ -160,6 +162,26 @@ void WorldManager::GenGBuffer()
 		Model* m = dynamic_cast<Model*>(Objects[i]);
 		if (m)
 			m->GenGBuffer();
+	}
+}
+
+void WorldManager::RenderOpaqueObjects()
+{
+	for (int i = 0; i < Objects.size(); ++i)
+	{
+		Model* m = dynamic_cast<Model*>(Objects[i]);
+		if (m)
+			m->render();
+	}
+}
+
+void WorldManager::RenderTransparentObjects()
+{
+	for (int i = 0; i < Objects.size(); ++i)
+	{
+		Model* m = dynamic_cast<Model*>(Objects[i]);
+		if (!m)
+			Objects[i]->render();
 	}
 }
 void WorldManager::render()
