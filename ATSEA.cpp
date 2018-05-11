@@ -461,6 +461,11 @@ void OnKeyUp(INT32 key)
 		WorldManager::Instance().PlayRainDrop();
 		break;
 	}
+	case '5':
+	{
+		WorldManager::Instance().SwitchRenderMode();
+		break;
+	}
 
 	};
 }

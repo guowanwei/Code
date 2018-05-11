@@ -1,4 +1,4 @@
-#include "stdafx.h"
+
 #include "Utilities.h"
 
 void Utilities::WriteMatrix(std::ostream& inStream, FbxMatrix& inMatrix, bool inIsRoot)

@@ -73,6 +73,8 @@ protected:
 	ID3D11PixelShader* mPixelShader;
 	ID3D11GeometryShader* mGeometryShader;
 
+	ID3D11PixelShader* mGBufferPixelShader;
+
 	//inputlayout
 	ID3D11InputLayout* mInputLayout;
 
@@ -107,4 +109,6 @@ public:
 	virtual void InitAABB();
 	virtual void RenderAABB();
 	virtual ~Model();
+
+	void GenGBuffer();
 };

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "d3d9.h"
 #include"Model.h"
 #include "D3Dcompiler.h"
 #include "Device.h"
@@ -135,6 +136,33 @@ Model::Model(const char* FbxFilePath, const WCHAR* ShaderFilePath, WorldTransfor
 	}
 
 	Device::Instance().GetDevice()->CreatePixelShader(PixelShaderBuffer->GetBufferPointer(), PixelShaderBuffer->GetBufferSize(), NULL, &mPixelShader);
+
+
+
+	result = D3DX11CompileFromFile(L"Resource/Shader/Common.hlsl", Macros, NULL, "GBufferPS", "ps_5_0", D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, NULL, &PixelShaderBuffer, &errorMessage, NULL);
+	if (FAILED(result))
+	{
+		// 获取指向错误信息文本的指针
+		char* compileErrors = (char*)(errorMessage->GetBufferPointer());
+
+		// 获取错误信息文本的长度
+		int bufferSize = errorMessage->GetBufferSize();
+
+		std::ofstream fout;
+
+		// 创建一个txt,用于写入错误信息
+		fout.open("shader-error.txt");
+
+		//想txt文件写入错误信息
+		for (int i = 0; i < bufferSize; i++)
+		{
+			fout << compileErrors[i];
+		}
+
+		// 关闭文件
+		fout.close();
+	}
+	Device::Instance().GetDevice()->CreatePixelShader(PixelShaderBuffer->GetBufferPointer(), PixelShaderBuffer->GetBufferSize(), NULL, &mGBufferPixelShader);
 
 	//create input layout
 	D3D11_INPUT_ELEMENT_DESC vertexInputLayout[] =
@@ -403,6 +431,9 @@ void Model::render()
 	//首选渲染boundingbox
 	RenderAABB();
 	if (Pixel == 0) return;
+
+	const WCHAR* Event123 = L"guowanwei";
+	//D3DPERF_BeginEvent(1, Event123);
 	Device::Instance().GetContext()->IASetInputLayout(mInputLayout);
 	Device::Instance().GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	UINT stride = sizeof(BaseCommonVertex);
@@ -436,6 +467,7 @@ void Model::render()
 		std::cout << mName << std::endl;
 	}
 	x = (x + 1) % 1001;
+	//D3DPERF_EndEvent();
 }
 bool Model::init()
 {
@@ -463,6 +495,9 @@ Model::~Model()
 	mInputLayout = 0;
 	if (mGeometryShader) mGeometryShader->Release();
 	mGeometryShader = 0;
+
+	if (mGBufferPixelShader) mGBufferPixelShader->Release();
+	mGBufferPixelShader = 0;
 
 	if (mRasterizerState) mRasterizerState->Release();
 	mRasterizerState = 0;
@@ -571,4 +606,68 @@ void Model::recompileshader()
 		fout.close();
 	}
 	Device::Instance().GetDevice()->CreatePixelShader(PixelShaderBuffer->GetBufferPointer(), PixelShaderBuffer->GetBufferSize(), NULL, &mPixelShader);
+
+
+	result = D3DX11CompileFromFile(L"Resource/Shader/Common.hlsl", Macros, NULL, "GBufferPS", "ps_5_0", D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, NULL, &PixelShaderBuffer, &errorMessage, NULL);
+	if (FAILED(result))
+	{
+		// 获取指向错误信息文本的指针
+		char* compileErrors = (char*)(errorMessage->GetBufferPointer());
+
+		// 获取错误信息文本的长度
+		int bufferSize = errorMessage->GetBufferSize();
+
+		std::ofstream fout;
+
+		// 创建一个txt,用于写入错误信息
+		fout.open("shader-error.txt");
+
+		//想txt文件写入错误信息
+		for (int i = 0; i < bufferSize; i++)
+		{
+			fout << compileErrors[i];
+		}
+
+		// 关闭文件
+		fout.close();
+	}
+	Device::Instance().GetDevice()->CreatePixelShader(PixelShaderBuffer->GetBufferPointer(), PixelShaderBuffer->GetBufferSize(), NULL, &mGBufferPixelShader);
+
+	VertexShaderBuffer->Release();
+	VertexShaderBuffer = NULL;
+	PixelShaderBuffer->Release();
+	PixelShaderBuffer = NULL;
+}
+
+void Model::GenGBuffer()
+{
+
+	Device::Instance().GetContext()->IASetInputLayout(mInputLayout);
+	Device::Instance().GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	UINT stride = sizeof(BaseCommonVertex);
+	UINT offset = 0;
+	Device::Instance().GetContext()->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
+	Device::Instance().GetContext()->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	Device::Instance().GetContext()->VSSetConstantBuffers(0, 1, &mCBMatrixBufferVS);
+	Device::Instance().GetContext()->PSSetConstantBuffers(0, 1, &mCBMatrixBufferPS);
+	Device::Instance().GetContext()->PSSetSamplers(0, 1, &mSamplerState);
+
+	//设置VertexShader和PixelShader
+	Device::Instance().GetContext()->VSSetShader(mVertexShader, NULL, 0);
+	Device::Instance().GetContext()->PSSetShader(mGBufferPixelShader, NULL, 0);
+	Device::Instance().GetContext()->RSSetState(mRasterizerState);
+	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	Device::Instance().GetContext()->OMSetBlendState(mBlendState, blendFactor, 0xffffffff);
+	Device::Instance().GetContext()->OMSetDepthStencilState(mDepthStencilState, 0);
+
+	for (std::map<UINT, MaterialDesc>::iterator iter = meshData.materials.begin(); iter != meshData.materials.end(); ++iter)
+	{
+		Device::Instance().GetContext()->PSSetShaderResources(0, 1, &mMaterials[iter->first].DiffuseMap);
+		Device::Instance().GetContext()->PSSetShaderResources(1, 1, &mMaterials[iter->first].NormalMap);
+		Device::Instance().GetContext()->PSSetShaderResources(2, 1, &mMaterials[iter->first].RougMetallicMap);
+		Device::Instance().GetContext()->PSSetShaderResources(3, 1, &mCubeTexture);
+
+		Device::Instance().GetContext()->DrawIndexed(iter->second.countIndex, iter->second.startIndex, 0);
+	}
+
 }

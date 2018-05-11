@@ -1,6 +1,8 @@
 #pragma once
 #include<d3d11.h>
 #include<d3dx11.h>
+
+class RenderTarget;
 class Device
 {
 private:
@@ -50,6 +52,13 @@ public:
 		d3dContext_->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	}
+	void ClearRenderTarget(ID3D11RenderTargetView* RenderTargetView)
+	{
+		float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		d3dContext_->ClearRenderTargetView(RenderTargetView, clearColor);
+	}
 	~Device();
 	bool DrawOnScreenFinally();
+
+	bool SetRenderTargets(int TargetsNum, RenderTarget** RenderTargets, ID3D11DepthStencilView* DepthBuffer = NULL);
 };

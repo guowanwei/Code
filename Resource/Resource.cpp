@@ -1,4 +1,4 @@
-#include "stdafx.h"
+
 #include "Resource.h"
 #include "ResourceManager.h"
 Resource::Resource(ResourceType type,std::string globalName)

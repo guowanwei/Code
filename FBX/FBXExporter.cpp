@@ -1,6 +1,5 @@
-#include "stdafx.h"
-//#include "../BaseUtilities.h"
 
+//#include "../BaseUtilities.h"
 #include "Utilities.h"
 #include <fstream>
 #include <sstream>

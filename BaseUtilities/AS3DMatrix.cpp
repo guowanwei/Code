@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "AS3DMatrix.h"
 //	Clear all elements to zero
 void AS3DMATRIX3::Clear()

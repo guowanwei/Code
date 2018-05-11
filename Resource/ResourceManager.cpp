@@ -1,4 +1,4 @@
-#include "stdafx.h"
+
 #include "ResourceManager.h"
 bool ResourceManager::RemoveResource(ResourceType type, std::string globalName)
 {

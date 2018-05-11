@@ -1,19 +1,28 @@
 #pragma once
 #include "Object.h"
 #include <vector>
+#include "ComputeShaderTestModule/ComputeShaderTestModule.h"
 class ConeRain;
 class RainDrop;
 class WorldManager
 {
 private:
 	std::vector<Object*> Objects;
+
 	//
+	ComputeShaderTestModule * pComputeShaderTest;
 	ConeRain* pRain;
 	RainDrop* pRainDrop;
-	WorldManager() { pRain = NULL; };
+	WorldManager() {
+		pRain = NULL; 
+		DeferredRendering = false;
+	};
+	bool DeferredRendering;
 public:
 	void ModifyRainIntensify(bool add);
 	void PlayRainDrop();
+	void SwitchRenderMode();
+	bool IsDeferringRenderMode();
 	static WorldManager& Instance() {
 		static WorldManager worldManager;
 		return worldManager;
@@ -32,5 +41,13 @@ public:
 		{
 			delete Objects[i];
 		}
+		if (pComputeShaderTest)
+		{
+			delete pComputeShaderTest;
+			pComputeShaderTest = NULL;
+		}
 	}
+
+	//
+	void GenGBuffer();
 };

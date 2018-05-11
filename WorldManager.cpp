@@ -29,7 +29,7 @@ void WorldManager::init()
 		pObject->init();
 		Objects.push_back(pObject);
 	}
-	
+	/*
 	//sky 
 	{
 		AS3DVECTOR3 scale(10.0f, 10.0f, 10.0f);
@@ -55,6 +55,7 @@ void WorldManager::init()
 		Objects.push_back(pObject);
 		pRainDrop = pObject;
 	}
+	*/
 	//sphere for test
 	/*
 	for( int row = 1; row < 9; ++row)
@@ -98,6 +99,7 @@ void WorldManager::init()
 	}
 	*/
 	//conerain
+	/*
 	{
 		AS3DVECTOR3 scale(100.0f, 100.0f, 500.0f);
 		float x = 2000;
@@ -112,6 +114,9 @@ void WorldManager::init()
 			Objects.push_back(conerain);
 		}
 	}
+	*/
+	//init compute shader test module
+	pComputeShaderTest = new ComputeShaderTestModule();
 }
 void WorldManager::update(float delta)
 {
@@ -137,6 +142,26 @@ void WorldManager::PlayRainDrop()
 		pRainDrop->Play();
 	}
 }
+
+void WorldManager::SwitchRenderMode()
+{
+	DeferredRendering = !DeferredRendering;
+}
+
+bool WorldManager::IsDeferringRenderMode()
+{
+	return DeferredRendering;
+}
+void WorldManager::GenGBuffer()
+{
+	
+	for (int i = 0; i < Objects.size(); ++i)
+	{
+		Model* m = dynamic_cast<Model*>(Objects[i]);
+		if (m)
+			m->GenGBuffer();
+	}
+}
 void WorldManager::render()
 {
 	/**/
@@ -153,6 +178,8 @@ void WorldManager::render()
 
 	Device::Instance().GetSwapChain()->Present(0, 0);
 	*/
+
+	pComputeShaderTest->Execute();
 }
 void WorldManager::AddObject(Object* object)
 {

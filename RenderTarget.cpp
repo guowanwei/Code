@@ -2,7 +2,9 @@
 #include"RenderTarget.h"
 #include "Device.h"
 RenderTarget::RenderTarget(UINT width, UINT height, DXGI_FORMAT RenderTargetFormat)
+	:mWidth(width), mHeight(height), mFormat(RenderTargetFormat)
 {
+	/*
 	//depth buffer
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
 	depthStencilDesc.Width = width;
@@ -18,7 +20,7 @@ RenderTarget::RenderTarget(UINT width, UINT height, DXGI_FORMAT RenderTargetForm
 	depthStencilDesc.MiscFlags = 0;
 	Device::Instance().GetDevice()->CreateTexture2D(&depthStencilDesc, 0, &mDepthStencilBuffer);
 	Device::Instance().GetDevice()->CreateDepthStencilView(mDepthStencilBuffer, 0, &mDepthStencilView);
-
+	*/
 	D3D11_TEXTURE2D_DESC RenderTargetDesc;
 	RenderTargetDesc.Width = width;
 	RenderTargetDesc.Height = height;
@@ -35,34 +37,27 @@ RenderTarget::RenderTarget(UINT width, UINT height, DXGI_FORMAT RenderTargetForm
 	Device::Instance().GetDevice()->CreateRenderTargetView(mRenderTargetBuffer, 0, &mRenderTargetView);
 	Device::Instance().GetDevice()->CreateShaderResourceView(mRenderTargetBuffer, 0, &mShaderResourceView);
 }
-bool RenderTarget::ApplyAsTexture(int layer)
+ID3D11ShaderResourceView*& RenderTarget::GetShaderResourceView()
 {
-	Device::Instance().GetContext()->PSSetShaderResources(layer, 1, &mShaderResourceView);
-	return true;
+	return mShaderResourceView;
 }
-bool RenderTarget::ApplyToDevice()
+ID3D11RenderTargetView*& RenderTarget::GetRenderTargetView()
 {
-	Device::Instance().GetContext()->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
-	return true;
+	return mRenderTargetView;
 }
 bool RenderTarget::ClearRenderTarget()
 {
 	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	Device::Instance().GetContext()->ClearRenderTargetView(mRenderTargetView, clearColor);
-	Device::Instance().GetContext()->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	return true;
 }
 
 RenderTarget::~RenderTarget()
 {
-	if (mDepthStencilBuffer) mDepthStencilBuffer->Release();
-	mDepthStencilBuffer = 0;
 	if (mRenderTargetBuffer) mRenderTargetBuffer->Release();
 	mRenderTargetBuffer = 0;
 	if (mRenderTargetView) mRenderTargetView->Release();
 	mRenderTargetView = 0;
-	if (mDepthStencilView) mDepthStencilView->Release();
-	mDepthStencilView = 0;
 	if (mShaderResourceView) mShaderResourceView->Release();
 	mShaderResourceView = 0;
 }

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+
 #include "MathHelper.h"
 
 const XMFLOAT2 MathHelper::vector2Epsilon = XMFLOAT2(0.00001f, 0.00001f);

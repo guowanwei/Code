@@ -3,16 +3,20 @@
 #include<d3dx11.h>
 class RenderTarget
 {
-	ID3D11Texture2D * mDepthStencilBuffer;
 	ID3D11Texture2D * mRenderTargetBuffer;
-
 	ID3D11RenderTargetView* mRenderTargetView;
 	ID3D11ShaderResourceView* mShaderResourceView;
-	ID3D11DepthStencilView* mDepthStencilView;
+public:
+	UINT mWidth;
+	UINT mHeight;
+	DXGI_FORMAT mFormat;
 public:
 	RenderTarget(UINT width, UINT height, DXGI_FORMAT RenderTargetFormat);
-	bool ApplyAsTexture(int layer);
-	bool ApplyToDevice();
 	~RenderTarget();
+
+
+	ID3D11ShaderResourceView*& GetShaderResourceView();
+	ID3D11RenderTargetView*& GetRenderTargetView();
+	
 	bool ClearRenderTarget();
 };

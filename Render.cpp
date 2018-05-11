@@ -3,6 +3,7 @@
 #include "Device.h"
 #include "WorldManager.h"
 #include "count_performance.h"
+#include "DeferredRender/DeferredRender.h"
 Render& Render::Instance()
 {
 	static Render render;
@@ -30,11 +31,23 @@ void Render::RenderFlow()
 	*/
 
 	//最后渲染的屏幕中来
-	Device::Instance().DrawOnScreenFinally();
-	Device::Instance().ClearRenderTarget();
-	WorldManager::Instance().render();
+	//forward rendering
+	if (!WorldManager::Instance().IsDeferringRenderMode())
+	{
+		Device::Instance().DrawOnScreenFinally();
+		Device::Instance().ClearRenderTarget();
+		WorldManager::Instance().render();
+		//WorldManager::Instance().GenGBuffer();
+	}
+	else
+	{
+		Device::Instance().ClearRenderTarget();
+		DeferredRender::Instance().Render();
+	}
+
 	BeginCountPerformance(Present)
-		//BeginCountPerformance(ggg)
+	//BeginCountPerformance(ggg)
 	Device::Instance().GetSwapChain()->Present(0, 0);
 	EndCountPerformance(Present)
+
 }
