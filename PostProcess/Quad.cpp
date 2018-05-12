@@ -1,12 +1,21 @@
-#include "stdafx.h"
 #include "Quad.h"
 #include <vector>
-#include "Device.h"
-#include "Camera.h"
+#include "../Device.h"
+#include "../Camera.h"
 #include "D3Dcompiler.h"
 #include <fstream>
-#include "RenderTarget.h"
-DrawQuad::DrawQuad()
+#include "../RenderTarget.h"
+
+struct QuadVertexData
+{
+	AS3DVECTOR3 Pos;
+	AS3DVECTOR3 UV;
+	QuadVertexData(AS3DVECTOR3 P, AS3DVECTOR3 U)
+		:Pos(P), UV(U)
+	{
+	}
+};
+DrawQuad::DrawQuad(const WCHAR* ShaderFilePath)
 {
 
 	std::vector<QuadVertexData> Vertices;
@@ -29,14 +38,7 @@ DrawQuad::DrawQuad()
 	vinitData.pSysMem = &Vertices[0];
 	Device::Instance().GetDevice()->CreateBuffer(&vbd, &vinitData, &mVertexBuffer);
 
-	//create const buffer
-	D3D11_BUFFER_DESC matrixBufferDescPS;
-	ZeroMemory(&matrixBufferDescPS, sizeof(matrixBufferDescPS));
-	matrixBufferDescPS.Usage = D3D11_USAGE_DEFAULT;
-	matrixBufferDescPS.ByteWidth = sizeof(QuadPixelConBuffer);
-	matrixBufferDescPS.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	matrixBufferDescPS.CPUAccessFlags = 0;
-	Device::Instance().GetDevice()->CreateBuffer(&matrixBufferDescPS, NULL, &mCBMatrixBufferPS);
+	
 
 	//compile and create shader
 	HRESULT result;
@@ -48,7 +50,7 @@ DrawQuad::DrawQuad()
 	D3D10_SHADER_MACRO Shader_Macros[] = { NULL,NULL };
 	Macros = Shader_Macros;
 	
-	const WCHAR* ShaderFilePath = L"Resource/Shader/Lighting.hlsl";
+	//const WCHAR* ShaderFilePath = L"Resource/Shader/Lighting.hlsl";
 	//D3D10_SHADER_MACRO Shader_Macros[] = {NULL,NULL };
 	result = D3DX11CompileFromFile(ShaderFilePath, Macros, NULL, "VS", "vs_5_0", D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, NULL, &VertexShaderBuffer, &errorMessage, NULL);
 	if (FAILED(result))
@@ -166,28 +168,15 @@ DrawQuad::DrawQuad()
 	Device::Instance().GetDevice()->CreateDepthStencilState(&depthStencilDesc, &mDepthStencilState);
 
 }
-void DrawQuad::render(RenderTarget* BaseColor, RenderTarget* Normal, RenderTarget* RoughnessMetallic, RenderTarget* WorldPos)
+void DrawQuad::Render(std::vector<RenderTarget*>& InputRenderTargets,std::vector<RenderTarget*>& OutputRenderTargets)
 {
-	//更新像素const buffer
-	QuadPixelConBuffer cbufferPixel;
-	cbufferPixel.LightColor = AS3DVECTOR4(8.0f, 8.0f, 8.0f, 0.0f);
-	//cbufferPixel.LightColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	AS3DVECTOR3 tmp1 = Camera::Instance().GetEyePos();
-	cbufferPixel.EyePosW.x = tmp1.x;
-	cbufferPixel.EyePosW.y = tmp1.y;
-	cbufferPixel.EyePosW.z = tmp1.z;
-	cbufferPixel.LightDir = AS3DVECTOR4(-1.0f, -1.0f, -1.0f, 0.0f);
-	Device::Instance().GetContext()->UpdateSubresource(mCBMatrixBufferPS, 0, NULL, &cbufferPixel, 0, 0);
-
-
-
+	//不写深度不进行深度测试的
 	Device::Instance().GetContext()->IASetInputLayout(mInputLayout);
 	Device::Instance().GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	UINT stride = sizeof(QuadVertexData);
 	UINT offset = 0;
 	Device::Instance().GetContext()->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
 	//Device::Instance().GetContext()->VSSetConstantBuffers(0, 1, &mCBMatrixBufferVS);
-	Device::Instance().GetContext()->PSSetConstantBuffers(0, 1, &mCBMatrixBufferPS);
 	Device::Instance().GetContext()->PSSetSamplers(0, 1, &mSamplerState);
 
 	//设置VertexShader和PixelShader
@@ -197,13 +186,27 @@ void DrawQuad::render(RenderTarget* BaseColor, RenderTarget* Normal, RenderTarge
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	Device::Instance().GetContext()->OMSetBlendState(mBlendState, blendFactor, 0xffffffff);
 	Device::Instance().GetContext()->OMSetDepthStencilState(mDepthStencilState, 0);
-
-	;
-	Device::Instance().GetContext()->PSSetShaderResources(0, 1, &(BaseColor->GetShaderResourceView()));
-	Device::Instance().GetContext()->PSSetShaderResources(1, 1, &(Normal->GetShaderResourceView()));
-	Device::Instance().GetContext()->PSSetShaderResources(2, 1, &(RoughnessMetallic->GetShaderResourceView()));
-	Device::Instance().GetContext()->PSSetShaderResources(3, 1, &(WorldPos->GetShaderResourceView()));
-
+	
+	if (OutputRenderTargets.size() > 0)
+	{
+		for (int i = 0; i < OutputRenderTargets.size(); ++i)
+		{
+			Device::Instance().ClearRenderTarget(OutputRenderTargets[i]->GetRenderTargetView());
+		}
+		Device::Instance().SetRenderTargets(OutputRenderTargets);
+	}
+	else
+	{
+		Device::Instance().DrawOnScreenFinally();
+	}
+	//操了他的妈了，PSSetShaderResources 一直绑定不成功，msdn中给的解释
+	//所以这个放在 SetRenderTarget之后。。。。。。。。
+	/*If an overlapping resource view is already bound to an output slot, such as a rendertarget, then this API will fill the destination shader resource slot with NULL.
+	*/
+	for (int i = 0; i < InputRenderTargets.size(); ++i)
+	{
+		Device::Instance().GetContext()->PSSetShaderResources(i, 1, &(InputRenderTargets[i]->GetShaderResourceView()));
+	}
 	Device::Instance().GetContext()->Draw(6, 0);
 }
 
@@ -251,11 +254,5 @@ DrawQuad::~DrawQuad()
 	{
 		mDepthStencilState->Release();
 		mDepthStencilState = NULL;
-	}
-
-	if (mCBMatrixBufferPS)
-	{
-		mCBMatrixBufferPS->Release();
-		mCBMatrixBufferPS = NULL;
 	}
 }

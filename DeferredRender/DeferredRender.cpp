@@ -2,6 +2,8 @@
 #include "../RenderTargetManager.h"
 #include "../Device.h"
 #include "../WorldManager.h"
+#include "DeferredShadingStage.h"
+#include "../PostProcess/ToneMap.h"
 void DeferredRender::Render()
 {
 	//set render target and depth buffer
@@ -14,8 +16,13 @@ void DeferredRender::Render()
 	device.ClearRenderTarget(RoughnessMetallic->GetRenderTargetView());
 	WorldPos = RenderTargetManager::Instance().PopRenderTarget(device.GetWinWidth(), device.GetWinHeight(), DXGI_FORMAT_R16G16B16A16_FLOAT);
 	device.ClearRenderTarget(WorldPos->GetRenderTargetView());
-	RenderTarget* tmp[4] = { BaseColor ,Normal,RoughnessMetallic,WorldPos };
-	device.SetRenderTargets(4, &tmp[0], NULL);
+
+	std::vector<RenderTarget*> GBufferRenderTargets;
+	GBufferRenderTargets.push_back(BaseColor);
+	GBufferRenderTargets.push_back(Normal);
+	GBufferRenderTargets.push_back(RoughnessMetallic);
+	GBufferRenderTargets.push_back(WorldPos);
+	device.SetRenderTargets(GBufferRenderTargets, NULL);
 	device.ClearDepthBuffer();
 
 	
@@ -28,7 +35,23 @@ void DeferredRender::Render()
 	device.ClearRenderTarget();
 
 	//light stage
-	Quad->render(BaseColor, Normal, RoughnessMetallic, WorldPos);
+	std::vector<RenderTarget*> LightResultRenderTargets;
+	RenderTarget* LightResult = RenderTargetManager::Instance().PopRenderTarget(device.GetWinWidth(), device.GetWinHeight(), DXGI_FORMAT_R16G16B16A16_FLOAT);
+	LightResultRenderTargets.push_back(LightResult);
+	Quad->Render(GBufferRenderTargets, LightResultRenderTargets);
+
+	
+
+	//render transparent objects
+	//
+	WorldManager::Instance().RenderTransparentObjects();
+
+
+	//tonemap
+	std::vector<RenderTarget*> TonemapResult;
+	PostProcessTonemap::Instance().Render(LightResultRenderTargets, TonemapResult);
+
+
 
 	//back rendertarget
 	RenderTargetManager::Instance().PushRenderTarget(Normal);
@@ -39,15 +62,14 @@ void DeferredRender::Render()
 	RoughnessMetallic = NULL;
 	RenderTargetManager::Instance().PushRenderTarget(WorldPos);
 	WorldPos = NULL;
-
-	//render transparent objects
-	//
-	WorldManager::Instance().RenderTransparentObjects();
+	RenderTargetManager::Instance().PushRenderTarget(LightResult);
+	LightResult = NULL;
+	
 }
 
 DeferredRender::DeferredRender()
 {
-	Quad = new DrawQuad();
+	Quad = new DeferredShading(L"Resource/Shader/Lighting.hlsl");
 }
 DeferredRender::~DeferredRender()
 {

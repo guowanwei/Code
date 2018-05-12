@@ -107,18 +107,19 @@ bool Device::init(HWND hwnd)
 bool Device::DrawOnScreenFinally()
 {
 	d3dContext_->OMSetRenderTargets(1, &backBufferTarget_, mDepthStencilView);
+	ClearRenderTarget();
 	return true;
 }
 
-bool Device::SetRenderTargets(int TargetsNum, RenderTarget** RenderTargets, ID3D11DepthStencilView* DepthBuffer)
+bool Device::SetRenderTargets(const std::vector<RenderTarget*>& RenderTargets, ID3D11DepthStencilView* DepthBuffer)
 {
 	if (!DepthBuffer) DepthBuffer = mDepthStencilView;
 	std::vector<ID3D11RenderTargetView*> Views;
-	for (int i = 0; i < TargetsNum; ++i)
+	for (int i = 0; i < RenderTargets.size(); ++i)
 	{
 		Views.push_back(RenderTargets[i]->GetRenderTargetView());
 	}
-	d3dContext_->OMSetRenderTargets(TargetsNum, &Views[0], DepthBuffer);
+	d3dContext_->OMSetRenderTargets(Views.size(), &Views[0], DepthBuffer);
 	return true;
 }
 Device::~Device()

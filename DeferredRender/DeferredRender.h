@@ -1,7 +1,7 @@
 #pragma once
 #include "../IRender.h"
 #include "../RenderTarget.h"
-#include "../Quad.h"
+#include "../PostProcess/Quad.h"
 class DeferredRender : public IRender
 {
 	RenderTarget* Normal;

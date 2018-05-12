@@ -1,7 +1,7 @@
 #pragma once
 #include<d3d11.h>
 #include<d3dx11.h>
-
+#include <vector>
 class RenderTarget;
 class Device
 {
@@ -65,5 +65,5 @@ public:
 	~Device();
 	bool DrawOnScreenFinally();
 
-	bool SetRenderTargets(int TargetsNum, RenderTarget** RenderTargets, ID3D11DepthStencilView* DepthBuffer = NULL);
+	bool SetRenderTargets(const std::vector<RenderTarget*>& RenderTargets, ID3D11DepthStencilView* DepthBuffer = NULL);
 };
